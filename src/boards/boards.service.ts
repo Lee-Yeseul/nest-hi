@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
 import { Board } from './board.entity';
 import { BoardStatus } from './board-status-enum.model';
+import { User } from 'src/auth/user.entity';
 // injectable decorator를 통해서 다른 모듈에서 해당 service 파일을 사용가능하게 한다.
 @Injectable()
 export class BoardsService {
@@ -16,6 +17,13 @@ export class BoardsService {
     return await this.boardRepository.find();
   }
 
+  async getBoardsByUser(user: User): Promise<Board[]> {
+    const query = this.boardRepository.createQueryBuilder('board');
+    query.where('board.userId = :userId', { userId: user.id });
+    const boards = await query.getMany();
+    return boards;
+  }
+
   async getBoardById(id: number): Promise<Board> {
     const found = await this.boardRepository.findOneBy({ id });
     if (!found) {
@@ -24,8 +32,8 @@ export class BoardsService {
     return found;
   }
 
-  createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
-    return this.boardRepository.createBoard(createBoardDto);
+  createBoard(createBoardDto: CreateBoardDto, user: User): Promise<Board> {
+    return this.boardRepository.createBoard(createBoardDto, user);
   }
 
   async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
@@ -37,8 +45,15 @@ export class BoardsService {
     return board;
   }
 
-  async deleteBoard(id: number): Promise<void> {
-    const result = await this.boardRepository.delete(id);
+  async deleteBoard(id: number, user: User): Promise<void> {
+    const result = await this.boardRepository
+      .createQueryBuilder('board')
+      .delete()
+      .from(Board)
+      .where('userId = :userId', { userId: user.id })
+      .andWhere('id = :id', { id: id })
+      .execute();
+
     if (!result.affected)
       throw new NotFoundException(`cannot find board with id ${id}`);
   }
