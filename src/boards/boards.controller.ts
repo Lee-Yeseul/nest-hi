@@ -13,12 +13,12 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { BoardsService } from './boards.service';
-import { CreateBoardDto } from './dto/create-board.dto';
+import { CreateBoardDto } from './dto/createBoard.dto';
 import { Board } from './board.entity';
-import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
-import { BoardStatus } from './board-status-enum.model';
+import { BoardStatusValidationPipe } from './pipes/boardStatusValidation.pipe';
+import { BoardStatus } from './boardStatusEnum.model';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from 'src/auth/get-user.decorator';
+import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { User } from 'src/auth/user.entity';
 
 @Controller('boards')

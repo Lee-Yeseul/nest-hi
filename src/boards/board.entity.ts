@@ -5,7 +5,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BoardStatus } from './board-status-enum.model';
+import { BoardStatus } from './boardStatusEnum.model';
 import { User } from 'src/auth/user.entity';
 
 @Entity()

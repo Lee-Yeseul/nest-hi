@@ -8,7 +8,7 @@ import {
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from './dto/auth-credentials.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './get-user.decorator';
+import { GetUser } from './decorator/getUser.decorator';
 import { User } from './user.entity';
 
 @Controller('auth')

@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateBoardDto } from './dto/create-board.dto';
+import { CreateBoardDto } from './dto/createBoard.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
 import { Board } from './board.entity';
-import { BoardStatus } from './board-status-enum.model';
+import { BoardStatus } from './boardStatusEnum.model';
 import { User } from 'src/auth/user.entity';
 // injectable decorator를 통해서 다른 모듈에서 해당 service 파일을 사용가능하게 한다.
 @Injectable()
