@@ -36,6 +36,16 @@ export class BoardsService {
     return this.boardRepository.createBoard(createBoardDto, user);
   }
 
+  async updateBoard(id: number, updatedBoard: Board): Promise<Board> {
+    const board = await this.getBoardById(id);
+    const newBoard = {
+      ...board,
+      ...updatedBoard,
+    };
+
+    return await this.boardRepository.save(newBoard);
+  }
+
   async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
     const board = await this.getBoardById(id);
 

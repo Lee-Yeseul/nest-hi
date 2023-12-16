@@ -32,7 +32,7 @@ export class BoardsController {
     return this.boardService.getAllBoards();
   }
 
-  @Get('my')
+  @Get('/my')
   getBoardsByUser(@GetUser() user: User): Promise<Board[]> {
     this.logger.verbose(`User ${user.username} trying to get all boards`);
     return this.boardService.getBoardsByUser(user);
@@ -55,11 +55,19 @@ export class BoardsController {
     return this.boardService.createBoard(createBoardDto, user);
   }
 
+  @Put('/:id')
+  updateBoard(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() board: Board,
+  ): Promise<Board> {
+    return this.boardService.updateBoard(id, board);
+  }
+
   @Put('/:id/status')
   updateBoardStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body('status', BoardStatusValidationPipe) status: BoardStatus,
-  ) {
+  ): Promise<Board> {
     return this.boardService.updateBoardStatus(id, status);
   }
 
