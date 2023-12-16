@@ -5,7 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { AuthCredentialsDto } from './dto/auth-credentials.dto';
+import { CreateUserDto } from './dto/createUserDto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()
@@ -14,18 +14,18 @@ export class UserRepository extends Repository<User> {
     super(User, dataSourse.createEntityManager());
   }
 
-  async createUser(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { username, password } = authCredentialsDto;
+  async createUser(createUserDto: CreateUserDto): Promise<void> {
+    const { email, username, password } = createUserDto;
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = this.create({ username, password: hashedPassword });
+    const user = this.create({ email, username, password: hashedPassword });
 
     try {
       await this.save(user);
     } catch (error) {
       if (error.code === '23505') {
-        throw new ConflictException('Existing username');
+        throw new ConflictException(error.detail);
       }
       throw new InternalServerErrorException();
     }
