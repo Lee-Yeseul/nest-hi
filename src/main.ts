@@ -5,7 +5,7 @@ import * as config from 'config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   const serverConfig = config.get('server');
   const documentConfig = new DocumentBuilder()
     .setTitle('board app')
