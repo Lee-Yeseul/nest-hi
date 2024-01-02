@@ -1,6 +1,7 @@
 import { DataSource, Repository } from 'typeorm';
 import { User } from './user.entity';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
@@ -15,11 +16,14 @@ export class UserRepository extends Repository<User> {
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<void> {
-    const { email, username, password } = createUserDto;
+    const { email, password, confirmPassword } = createUserDto;
+
+    if (password !== confirmPassword)
+      throw new BadRequestException('Passwords do not match');
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = this.create({ email, username, password: hashedPassword });
+    const user = this.create({ email, password: hashedPassword });
 
     try {
       await this.save(user);

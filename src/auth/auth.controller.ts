@@ -10,14 +10,15 @@ import { CreateUserDto } from './dto/createUserDto';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from './decorator/getUser.decorator';
 import { User } from './user.entity';
+import { LoginUserDto } from './dto/loginUserDto';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { LoginUserDto } from './dto/loginUserDto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -27,7 +28,6 @@ export class AuthController {
   @Post('/signup')
   @ApiOperation({
     summary: '회원가입',
-    description: '사용자 정보를 추가합니다.',
   })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: '회원가입에 성공했습니다.' })
@@ -37,6 +37,22 @@ export class AuthController {
   }
 
   @Post('/signin')
+  @ApiOperation({
+    summary: '로그인',
+  })
+  @ApiBody({ type: LoginUserDto })
+  @ApiResponse({
+    status: 200,
+    content: {
+      'application/json': {
+        example: {
+          accesstoken:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoieWVzZXVsIiwiaWF0IjoxNzAyNzM1MTUxLCJleHAiOjE3MDI3Mzg3NTF9.PnuzQ6AVh4xmZ4pL_U4xwA0GQNJit2SJNmTncihZOFw',
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse()
   signIn(
     @Body(ValidationPipe) LoginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string }> {
