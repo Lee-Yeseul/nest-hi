@@ -32,8 +32,8 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: '회원가입에 성공했습니다.' })
   @ApiResponse({ status: 404, description: '회원가입에 실패했습니다.' })
-  signUp(@Body(ValidationPipe) CreateUserDto: CreateUserDto): Promise<void> {
-    return this.authService.signUp(CreateUserDto);
+  signUp(@Body(ValidationPipe) createUserDto: CreateUserDto): Promise<void> {
+    return this.authService.signUp(createUserDto);
   }
 
   @Post('/signin')
@@ -54,9 +54,14 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse()
   signIn(
-    @Body(ValidationPipe) LoginUserDto: LoginUserDto,
+    @Body(ValidationPipe) loginUserDto: LoginUserDto,
   ): Promise<{ accessToken: string }> {
-    return this.authService.singIn(LoginUserDto);
+    return this.authService.singIn(loginUserDto);
+  }
+
+  @Post('/kakao-code')
+  async kakaoLogin(@Body() code: { code: string }) {
+    return this.authService.kakaoLogin(code);
   }
 
   @Post('/test')
