@@ -60,7 +60,9 @@ export class AuthController {
   }
 
   @Post('/kakao-code')
-  async kakaoLogin(@Body() code: { code: string }) {
+  async kakaoLogin(
+    @Body() code: { code: string },
+  ): Promise<{ accessToken: string }> {
     return this.authService.kakaoLogin(code);
   }
 

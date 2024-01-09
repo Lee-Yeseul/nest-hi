@@ -47,11 +47,28 @@ export class AuthService {
     }
   }
 
+  async getAccessTokenByOAuth(email: string): Promise<{ accessToken: string }> {
+    try {
+      const user = await this.userRepository.findOneBy({ email });
+      if (!user) throw new NotFoundException();
+
+      // 유저 토큰 생성 (Secret + Payload)
+      const payload = { user: user.username };
+      const accessToken = this.jwtService.sign(payload);
+
+      return { accessToken };
+    } catch (error) {
+      Logger.error(error);
+      throw error;
+    }
+  }
+
   async kakaoLogin({ code }: { code: string }) {
     const grantType = 'authorization_code';
-    const KAKAO_REST_API_KEY = '103e9d26733b5df6fd03cf908e29787d';
-    const KAKAO_REDIRECT_URL = 'http://localhost:4000/auth/kakao';
-    const KAKAO_CLIENT_SECRET = 'JNs1890go5Q43kzM5sO83O9VhPS58KQo';
+    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
+    const KAKAO_REDIRECT_URL = process.env.KAKAO_REDIRECT_URL;
+    const KAKAO_CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET;
+
     try {
       const { data } = await lastValueFrom(
         this.httpService
@@ -78,8 +95,13 @@ export class AuthService {
           })
           .pipe(map((res) => res)),
       );
+
+      const accessToken = this.getAccessTokenByOAuth(
+        userInfo.kakao_account.email,
+      );
+      return accessToken;
     } catch (error) {
-      Logger.log(`error ${error.message}`);
+      Logger.error(error.message);
       throw error.response.data;
     }
   }

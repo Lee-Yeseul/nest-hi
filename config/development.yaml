@@ -1,8 +1,3 @@
 db:
   host: 'localhost'
-  username: 'seul'
-  password: 'seul'
   synchronize: true
-
-jwt:
-  secret: 'Secret1234'
