@@ -1,12 +1,12 @@
 import { DataSource, Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from '../entity/user.entity';
 import {
   BadRequestException,
   ConflictException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/createUserDto';
+import { CreateUserDto } from '../dto/createUserDto';
 import * as bcrypt from 'bcryptjs';
 
 @Injectable()

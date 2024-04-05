@@ -1,17 +1,19 @@
 import {
+  BadRequestException,
   Injectable,
   Logger,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserRepository } from './user.repository';
-import { CreateUserDto } from './dto/createUserDto';
+import { UserRepository } from '../repository/user.repository';
+import { CreateUserDto } from '../dto/createUserDto';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from './dto/loginUserDto';
+import { LoginUserDto } from '../dto/loginUserDto';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
+import { User } from '../entity/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -20,31 +22,39 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   signUp(createUserDto: CreateUserDto): Promise<void> {
     return this.userRepository.createUser(createUserDto);
   }
 
-  async singIn(loginUserDto: LoginUserDto): Promise<{ accessToken: string }> {
-    const { email, password } = loginUserDto;
+  async validateUser(loginUserDto: LoginUserDto) {
     try {
+      const { email, password } = loginUserDto;
+
       const user = await this.userRepository.findOneBy({ email });
-
       if (!user) throw new NotFoundException();
-      if (await bcrypt.compare(password, user.password)) {
-        // 유저 토큰 생성 (Secret + Payload)
-        const payload = { user: user.username };
-        const accessToken = this.jwtService.sign(payload);
+      if (!(await bcrypt.compare(password, user.password)))
+        throw new BadRequestException('Invalid credentials');
 
-        return { accessToken };
-      } else {
-        throw new UnauthorizedException();
-      }
+      return user;
     } catch (error) {
-      Logger.log(`error ${error}`);
-      throw error;
+      throw new Error(error);
     }
+  }
+
+  async generateAccessToken(user: User) {
+    const payload = { user: user.username, email: user.email };
+    return this.jwtService.signAsync(payload);
+  }
+
+  async generateRefreshToken(user: User) {
+    const payload = { user: user.username, email: user.email };
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get('JWT_REFRESH_EXPIRESIN'),
+    });
   }
 
   async getAccessTokenByOAuth(email: string): Promise<{ accessToken: string }> {
@@ -77,13 +87,9 @@ export class AuthService {
           )
           .pipe(map((res) => res)),
       );
-      const {
-        access_token,
-        // expires_in,
-        // refresh_token,
-        // refresh_token_expires_in,
-        token_type,
-      } = data;
+
+      const { access_token, token_type } = data;
+
       const userInfoUrl = `https://kapi.kakao.com/v2/user/me`;
       const userInfoHeaders = {
         Authorization: `${token_type} ${access_token}`,
@@ -96,17 +102,14 @@ export class AuthService {
           .pipe(map((res) => res)),
       );
 
-      const accessToken = this.getAccessTokenByOAuth(
+      const accessToken = await this.getAccessTokenByOAuth(
         userInfo.kakao_account.email,
       );
+
       return accessToken;
     } catch (error) {
       Logger.error(error.message);
       throw error.response.data;
     }
-  }
-
-  async OAuthLogin({ req, res }) {
-    console.log(req, res);
   }
 }

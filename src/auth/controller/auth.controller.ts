@@ -1,16 +1,18 @@
 import {
   Body,
   Controller,
+  Logger,
   Post,
+  Res,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateUserDto } from './dto/createUserDto';
+import { AuthService } from '../service/auth.service';
+import { CreateUserDto } from '../dto/createUserDto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './decorator/getUser.decorator';
-import { User } from './user.entity';
-import { LoginUserDto } from './dto/loginUserDto';
+import { GetUser } from '../decorator/getUser.decorator';
+import { User } from '../entity/user.entity';
+import { LoginUserDto } from '../dto/loginUserDto';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -19,6 +21,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -53,16 +56,33 @@ export class AuthController {
     },
   })
   @ApiUnauthorizedResponse()
-  signIn(
+  async signIn(
     @Body(ValidationPipe) loginUserDto: LoginUserDto,
-  ): Promise<{ accessToken: string }> {
-    return this.authService.singIn(loginUserDto);
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<any> {
+    const user = await this.authService.validateUser(loginUserDto);
+    const accessToken = await this.authService.generateAccessToken(user);
+    const refreshToken = await this.authService.generateRefreshToken(user);
+
+    res.setHeader('Authorization', 'Bearer ' + accessToken);
+    res.cookie('access_token', accessToken, {
+      httpOnly: true,
+    });
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+    });
+    return {
+      message: 'login success',
+      accessToken,
+      refreshToken,
+    };
   }
 
   @Post('/kakao-code')
   async kakaoLogin(
     @Body() code: { code: string },
   ): Promise<{ accessToken: string }> {
+    Logger.debug('kakao login: ', code);
     return this.authService.kakaoLogin(code);
   }
 
