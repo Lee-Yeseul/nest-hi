@@ -18,6 +18,9 @@ export class User extends BaseEntity {
   @Column({ name: 'local_refresh_token', nullable: true })
   localRefreshToken: string;
 
+  @Column({ name: 'local_refresh_token_exp', nullable: true })
+  localRefreshTokenExp: Date;
+
   @Column({ name: 'is_social_account_registered', default: false })
   isSocialAccountRegistered: boolean;
 

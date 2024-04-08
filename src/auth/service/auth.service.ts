@@ -50,11 +50,37 @@ export class AuthService {
   }
 
   async generateRefreshToken(user: User) {
-    const payload = { user: user.username, email: user.email };
+    const payload = { id: user.id };
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get('JWT_REFRESH_EXPIRESIN'),
     });
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentRefreshToken = await this.getCurrentRefreshToken(refreshToken);
+    const currentRefreshTokenExp = await this.getCurrentRefreshTokenExp();
+
+    await this.userRepository.update(userId, {
+      localRefreshToken: currentRefreshToken,
+      localRefreshTokenExp: currentRefreshTokenExp,
+    });
+  }
+
+  async getCurrentRefreshToken(refreshToken: string) {
+    const salt = 10;
+    const currentRefreshToken = await bcrypt.hash(refreshToken, salt);
+    return currentRefreshToken;
+  }
+
+  async getCurrentRefreshTokenExp() {
+    const currentDate = new Date();
+    const currentRefreshTokenExp = new Date(
+      currentDate.getTime() +
+        parseInt(this.configService.get<string>('JWT_REFRESH_EXPIRESIN')),
+    );
+
+    return currentRefreshTokenExp;
   }
 
   async getAccessTokenByOAuth(email: string): Promise<{ accessToken: string }> {

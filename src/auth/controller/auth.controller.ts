@@ -1,17 +1,16 @@
 import {
   Body,
   Controller,
-  Logger,
   Post,
+  Req,
   Res,
+  UnauthorizedException,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthService } from '../service/auth.service';
 import { CreateUserDto } from '../dto/createUserDto';
 import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from '../decorator/getUser.decorator';
-import { User } from '../entity/user.entity';
 import { LoginUserDto } from '../dto/loginUserDto';
 import {
   ApiBearerAuth,
@@ -22,11 +21,15 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @Post('/signup')
   @ApiOperation({
@@ -63,6 +66,7 @@ export class AuthController {
     const user = await this.authService.validateUser(loginUserDto);
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(user);
+    await this.authService.setCurrentRefreshToken(refreshToken, user.id);
 
     res.setHeader('Authorization', 'Bearer ' + accessToken);
     res.cookie('access_token', accessToken, {
@@ -78,19 +82,31 @@ export class AuthController {
     };
   }
 
+  @Post('/renew')
+  @UseGuards(AuthGuard('refresh'))
+  async renewAccessToken(@Req() req) {
+    try {
+      const { user } = req;
+      const newAccessToken = await this.authService.generateAccessToken(user);
+      return { newAccessToken: newAccessToken };
+    } catch (err) {
+      throw new UnauthorizedException('invalid refresh token');
+    }
+  }
+
   @Post('/kakao-code')
   async kakaoLogin(
     @Body() code: { code: string },
   ): Promise<{ accessToken: string }> {
-    Logger.debug('kakao login: ', code);
     return this.authService.kakaoLogin(code);
   }
 
-  @Post('/test')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'test', description: 'test 내용입니다.' })
   @UseGuards(AuthGuard())
-  test(@GetUser() user: User) {
-    console.log(user);
+  @Post('/test')
+  async test() {
+    console.log(this.configService.get<number>('JWT_EXPIRESIN'));
+    return { message: 'success' };
   }
 }

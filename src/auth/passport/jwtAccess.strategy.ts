@@ -6,7 +6,7 @@ import { UserRepository } from '../repository/user.repository';
 import { User } from '../entity/user.entity';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JWTAccess extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     @InjectRepository(UserRepository) private userRepository: UserRepository,
   ) {
@@ -17,9 +17,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload) {
-    const { username } = payload;
-    const user: User = await this.userRepository.findOneBy({ username });
+    const { email } = payload;
 
+    const user: User = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new UnauthorizedException();
     }

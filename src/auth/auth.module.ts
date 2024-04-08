@@ -4,9 +4,10 @@ import { AuthService } from './service/auth.service';
 import { UserRepository } from './repository/user.repository';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './passport/jwt.strategy';
+import { JWTAccess } from './passport/jwtAccess.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JWTRefresh } from './passport/jwtRefresh.strategy';
 
 @Module({
   imports: [
@@ -14,16 +15,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       global: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get('JWT_EXPIRESIN') },
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRESIN') },
       }),
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     HttpModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, JwtStrategy],
-  exports: [JwtStrategy, PassportModule],
+  providers: [AuthService, UserRepository, JWTAccess, JWTRefresh],
+  exports: [JWTAccess, JWTRefresh, PassportModule],
 })
 export class AuthModule {}

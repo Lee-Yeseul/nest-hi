@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -10,7 +11,8 @@ async function bootstrap() {
     origin: true,
     credentials: true,
   });
-
+  app.useGlobalPipes(new ValidationPipe());
+  app.use(cookieParser());
   const documentConfig = new DocumentBuilder()
     .setTitle('board app')
     .setDescription('board app swagger')
