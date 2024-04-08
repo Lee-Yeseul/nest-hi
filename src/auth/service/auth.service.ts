@@ -37,7 +37,6 @@ export class AuthService {
       if (!user) throw new NotFoundException();
       if (!(await bcrypt.compare(password, user.password)))
         throw new BadRequestException('Invalid credentials');
-
       return user;
     } catch (error) {
       throw new Error(error);

@@ -68,17 +68,12 @@ export class AuthController {
     const refreshToken = await this.authService.generateRefreshToken(user);
     await this.authService.setCurrentRefreshToken(refreshToken, user.id);
 
-    res.setHeader('Authorization', 'Bearer ' + accessToken);
-    res.cookie('access_token', accessToken, {
-      httpOnly: true,
-    });
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
     });
     return {
       message: 'login success',
       accessToken,
-      refreshToken,
     };
   }
 

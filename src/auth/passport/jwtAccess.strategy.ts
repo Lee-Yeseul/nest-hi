@@ -21,7 +21,7 @@ export class JWTAccess extends PassportStrategy(Strategy, 'jwt') {
 
     const user: User = await this.userRepository.findOneBy({ email });
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('invalid access token');
     }
     return user;
   }
