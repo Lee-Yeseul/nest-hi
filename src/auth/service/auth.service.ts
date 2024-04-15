@@ -99,12 +99,16 @@ export class AuthService {
   }
 
   async kakaoLogin({ code }: { code: string }) {
-    const grantType = 'authorization_code';
-    const KAKAO_REST_API_KEY = process.env.KAKAO_REST_API_KEY;
-    const KAKAO_REDIRECT_URL = process.env.KAKAO_REDIRECT_URL;
-    const KAKAO_CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET;
-
     try {
+      const grantType = 'authorization_code';
+      const KAKAO_REST_API_KEY =
+        this.configService.get<string>('KAKAO_REST_API_KEY');
+      const KAKAO_REDIRECT_URL =
+        this.configService.get<string>('KAKAO_REDIRECT_URL');
+      const KAKAO_CLIENT_SECRET = this.configService.get<string>(
+        'KAKAO_CLIENT_SECRET',
+      );
+
       const { data } = await lastValueFrom(
         this.httpService
           .post(
@@ -112,6 +116,7 @@ export class AuthService {
           )
           .pipe(map((res) => res)),
       );
+      console.log('this', data);
 
       const { access_token, token_type } = data;
 
@@ -126,6 +131,7 @@ export class AuthService {
           })
           .pipe(map((res) => res)),
       );
+      console.log(userInfo);
 
       const accessToken = await this.getAccessTokenByOAuth(
         userInfo.kakao_account.email,
@@ -133,7 +139,6 @@ export class AuthService {
 
       return accessToken;
     } catch (error) {
-      Logger.error(error.message);
       throw error.response.data;
     }
   }

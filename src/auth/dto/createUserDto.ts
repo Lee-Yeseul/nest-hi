@@ -16,8 +16,9 @@ export class CreateUserDto {
   @IsString()
   @MinLength(8)
   @MaxLength(15)
-  @Matches(/^[a-zA-Z0-9]*$/, {
-    message: 'password only accepts english and number',
+  @Matches(/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/, {
+    message:
+      'Password must contain at least one letter, one number, and be at least 8 characters long.',
   })
   password: string;
 
@@ -25,8 +26,9 @@ export class CreateUserDto {
   @IsString()
   @MinLength(8)
   @MaxLength(15)
-  @Matches(/^[a-zA-Z0-9]*$/, {
-    message: 'password only accepts english and number',
+  @Matches(/^(?=.*[a-zA-Z])(?=.*\d).{8,}$/, {
+    message:
+      'Password must contain at least one letter, one number, and be at least 8 characters long.',
   })
   confirmPassword: string;
 }

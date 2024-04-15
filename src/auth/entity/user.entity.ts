@@ -1,5 +1,13 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { SocialProvider, socialProvider } from '../enum/socialProvider.model';
+import { PlaceHistory } from 'src/place-histories/entity/placeHistory.entity';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
@@ -15,21 +23,27 @@ export class User extends BaseEntity {
   @Column()
   password: string;
 
-  @Column({ name: 'local_refresh_token', nullable: true })
+  @Column({ nullable: true })
   localRefreshToken: string;
 
-  @Column({ name: 'local_refresh_token_exp', nullable: true })
+  @Column({ nullable: true })
   localRefreshTokenExp: Date;
 
-  @Column({ name: 'is_social_account_registered', default: false })
-  isSocialAccountRegistered: boolean;
+  @Column({ nullable: true })
+  profileImage: string;
 
-  @Column({ name: 'social_provider', default: socialProvider.LOCAL })
-  socialProvider: SocialProvider;
+  @Column({ type: 'numeric', scale: 6, nullable: true })
+  latitude: number;
 
-  @Column({ name: 'social_id', nullable: true, default: null })
-  socialId: string;
+  @Column({ type: 'numeric', scale: 6, nullable: true })
+  longitude: number;
 
-  @Column({ name: 'social_refresh_token', nullable: true, default: null })
-  socialProvidedRefreshToken: string;
+  @OneToMany(() => PlaceHistory, (placesHistory) => placesHistory.id)
+  placesHistories: PlaceHistory[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
