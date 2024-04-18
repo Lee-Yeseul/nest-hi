@@ -1,3 +1,5 @@
+import { DogPost } from 'src/dog-posts/entity/dogPost.entity';
+import { Dog } from 'src/dogs/entity/dog.entity';
 import { PlaceHistory } from 'src/place-histories/entity/placeHistory.entity';
 import {
   BaseEntity,
@@ -37,6 +39,12 @@ export class User extends BaseEntity {
 
   @Column({ type: 'numeric', scale: 6, nullable: true })
   longitude: number;
+
+  @OneToMany(() => Dog, (dog) => dog.owner)
+  dogs: Dog[];
+
+  @OneToMany(() => DogPost, (dogPost) => dogPost.author)
+  dogPosts: DogPost[];
 
   @OneToMany(() => PlaceHistory, (placesHistory) => placesHistory.id)
   placesHistories: PlaceHistory[];

@@ -11,6 +11,8 @@ import { DogsModule } from './dogs/dogs.module';
 import { PlacesModule } from './places/places.module';
 import { PlaceHistoriesModule } from './place-histories/placeHistories.module';
 
+import { DogPostsModule } from './dog-posts/dogPosts.module';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeORMConfig),
@@ -21,6 +23,7 @@ import { PlaceHistoriesModule } from './place-histories/placeHistories.module';
     DogsModule,
     PlacesModule,
     PlaceHistoriesModule,
+    DogPostsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

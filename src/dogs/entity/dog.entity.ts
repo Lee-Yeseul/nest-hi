@@ -3,8 +3,6 @@ import {
   BaseEntity,
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -18,19 +16,25 @@ export class Dog extends BaseEntity {
   name: string;
 
   @Column()
-  species: string;
+  breed: string;
 
   @Column()
   age: number;
 
-  @ManyToOne(() => User)
-  place: User;
+  @Column({ nullable: true })
+  imageUrl: string;
 
-  @ManyToMany(() => Dog)
-  @JoinTable({
-    name: 'dog_friends',
-    joinColumn: { name: 'dog_id' },
-    inverseJoinColumn: { name: 'friend_id' },
-  })
-  friends: Dog[];
+  @ManyToOne(() => User, (user) => user.dogs)
+  owner: User;
+
+  @Column()
+  ownerId: number;
+
+  // @ManyToMany(() => Dog)
+  // @JoinTable({
+  //   name: 'friendship',
+  //   joinColumn: { name: 'id' },
+  //   inverseJoinColumn: { name: 'friendId' },
+  // })
+  // friends: Dog[];
 }

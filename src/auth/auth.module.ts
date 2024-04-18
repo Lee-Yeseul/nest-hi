@@ -17,7 +17,8 @@ import { JWTRefresh } from './passport/jwtRefresh.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRESIN') },
+        // signOptions: { expiresIn: configService.get<number>('JWT_EXPIRESIN') },
+        signOptions: { expiresIn: 7200 },
       }),
     }),
     PassportModule.register({ defaultStrategy: 'jwt' }),

@@ -27,6 +27,9 @@ export class PlaceHistory extends BaseEntity {
   @Column()
   content: string;
 
+  @Column()
+  visitedDate: Date;
+
   @CreateDateColumn()
   createdAt: Date;
 

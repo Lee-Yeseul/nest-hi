@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  HttpStatus,
   Post,
   Req,
   Res,
@@ -38,8 +39,12 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: '회원가입에 성공했습니다.' })
   @ApiResponse({ status: 404, description: '회원가입에 실패했습니다.' })
-  signUp(@Body(ValidationPipe) createUserDto: CreateUserDto): Promise<void> {
-    return this.authService.signUp(createUserDto);
+  signUp(
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
+    @Res() res: Response,
+  ) {
+    const result = this.authService.signUp(createUserDto);
+    return res.status(HttpStatus.CREATED).json(result);
   }
 
   @Post('/signin')
@@ -62,7 +67,7 @@ export class AuthController {
   async signIn(
     @Body(ValidationPipe) loginUserDto: LoginUserDto,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<any> {
+  ) {
     const user = await this.authService.validateUser(loginUserDto);
     const accessToken = await this.authService.generateAccessToken(user);
     const refreshToken = await this.authService.generateRefreshToken(user);
@@ -71,19 +76,21 @@ export class AuthController {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
     });
-    return {
+    return res.status(HttpStatus.OK).json({
       message: 'login success',
       accessToken,
-    };
+    });
   }
 
   @Post('/renew')
   @UseGuards(AuthGuard('refresh'))
-  async renewAccessToken(@Req() req) {
+  async renewAccessToken(@Req() req, @Res() res: Response) {
     try {
       const { user } = req;
       const newAccessToken = await this.authService.generateAccessToken(user);
-      return { newAccessToken: newAccessToken };
+      return res.status(HttpStatus.OK).json({
+        newAccessToken: newAccessToken,
+      });
     } catch (err) {
       throw new UnauthorizedException('invalid refresh token');
     }
