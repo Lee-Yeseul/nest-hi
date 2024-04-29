@@ -1,6 +1,7 @@
 import { DogPost } from 'src/dog-posts/entity/dogPost.entity';
 import { Dog } from 'src/dogs/entity/dog.entity';
 import { PlaceHistory } from 'src/place-histories/entity/placeHistory.entity';
+import { WalkHistory } from 'src/walk-histories/entity/walkHistory.entity';
 import {
   BaseEntity,
   Column,
@@ -32,13 +33,13 @@ export class User extends BaseEntity {
   localRefreshTokenExp: Date;
 
   @Column({ nullable: true })
-  profileImage: string;
+  profileImagePath: string;
 
   @Column({ type: 'numeric', scale: 6, nullable: true })
-  latitude: number;
+  registeredLatitude: number;
 
   @Column({ type: 'numeric', scale: 6, nullable: true })
-  longitude: number;
+  registeredLongitude: number;
 
   @OneToMany(() => Dog, (dog) => dog.owner)
   dogs: Dog[];
@@ -48,6 +49,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => PlaceHistory, (placesHistory) => placesHistory.id)
   placesHistories: PlaceHistory[];
+
+  @OneToMany(() => WalkHistory, (placesHistory) => placesHistory.id)
+  walkHistories: WalkHistory[];
 
   @CreateDateColumn()
   createdAt: Date;

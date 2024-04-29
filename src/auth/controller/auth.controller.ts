@@ -3,6 +3,7 @@ import {
   Controller,
   HttpStatus,
   Post,
+  Put,
   Req,
   Res,
   UnauthorizedException,
@@ -23,6 +24,9 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { CheckEmailUniqueDto } from '../dto/checkEmailUniqueDto';
+import { UpdateUserInfoDto } from '../dto/updateUserInfoDto';
+import { CheckUsernameUniqueDto } from '../dto/checkUsernameDto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -39,12 +43,8 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: '회원가입에 성공했습니다.' })
   @ApiResponse({ status: 404, description: '회원가입에 실패했습니다.' })
-  signUp(
-    @Body(ValidationPipe) createUserDto: CreateUserDto,
-    @Res() res: Response,
-  ) {
-    const result = this.authService.signUp(createUserDto);
-    return res.status(HttpStatus.CREATED).json(result);
+  async signUp(@Body(ValidationPipe) createUserDto: CreateUserDto) {
+    return await this.authService.signUp(createUserDto);
   }
 
   @Post('/signin')
@@ -76,13 +76,24 @@ export class AuthController {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
     });
-    return res.status(HttpStatus.OK).json({
-      message: 'login success',
-      accessToken,
-    });
+    return { message: 'login success', accessToken };
   }
 
   @Post('/renew')
+  @ApiOperation({
+    summary: 'accessToken 갱신',
+  })
+  @ApiResponse({
+    status: 200,
+    content: {
+      'application/json': {
+        example: {
+          newAccessToken:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoieWVzZXVsIiwiaWF0IjoxNzAyNzM1MTUxLCJleHAiOjE3MDI3Mzg3NTF9.PnuzQ6AVh4xmZ4pL_U4xwA0GQNJit2SJNmTncihZOFw',
+        },
+      },
+    },
+  })
   @UseGuards(AuthGuard('refresh'))
   async renewAccessToken(@Req() req, @Res() res: Response) {
     try {
@@ -94,6 +105,30 @@ export class AuthController {
     } catch (err) {
       throw new UnauthorizedException('invalid refresh token');
     }
+  }
+
+  @Post('/is-email-unique')
+  async checkEmailUnique(
+    @Body(ValidationPipe) checkEmailUniqueDto: CheckEmailUniqueDto,
+  ) {
+    return this.authService.checkEmailUnique(checkEmailUniqueDto);
+  }
+
+  @Post('/is-username-unique')
+  async checkUsernameUnique(
+    @Body(ValidationPipe) checkUsernameUniqueDto: CheckUsernameUniqueDto,
+  ) {
+    return this.authService.checkUsernameUnique(checkUsernameUniqueDto);
+  }
+
+  @Put('/user-info')
+  @UseGuards(AuthGuard('jwt'))
+  async updateUserInfo(
+    @Req() req,
+    @Body(ValidationPipe) updateUserInfo: UpdateUserInfoDto,
+  ) {
+    const { user } = req;
+    return this.authService.updateUserInfo(updateUserInfo, user.id);
   }
 
   @Post('/kakao-code')

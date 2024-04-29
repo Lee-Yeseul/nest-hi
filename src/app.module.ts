@@ -12,6 +12,7 @@ import { PlacesModule } from './places/places.module';
 import { PlaceHistoriesModule } from './place-histories/placeHistories.module';
 
 import { DogPostsModule } from './dog-posts/dogPosts.module';
+import { WalkHistoriesModule } from './walk-histories/walkHistories.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DogPostsModule } from './dog-posts/dogPosts.module';
     PlacesModule,
     PlaceHistoriesModule,
     DogPostsModule,
+    WalkHistoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

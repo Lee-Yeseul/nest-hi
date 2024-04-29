@@ -31,4 +31,9 @@ export class CreateUserDto {
       'Password must contain at least one letter, one number, and be at least 8 characters long.',
   })
   confirmPassword: string;
+
+  @ApiProperty({ description: '유저네임', default: '쓰리' })
+  @IsString()
+  @MaxLength(8)
+  username: string;
 }

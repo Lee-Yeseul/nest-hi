@@ -1,4 +1,5 @@
 import { User } from 'src/auth/entity/user.entity';
+import { Place } from 'src/places/entity/place.entity';
 import {
   BaseEntity,
   Column,
@@ -10,27 +11,21 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class Dog extends BaseEntity {
+export class WalkHistory extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  name: string;
-
-  @Column()
-  breed: string;
-
-  @Column()
-  age: number;
-
-  @Column({ nullable: true })
   imagePath: string;
 
-  @ManyToOne(() => User, (user) => user.dogs)
-  owner: User;
+  @ManyToOne(() => User)
+  user: User;
+
+  @ManyToOne(() => Place)
+  place: Place;
 
   @Column()
-  ownerId: number;
+  Date: Date;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -14,6 +14,10 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
 import { User } from '../entity/user.entity';
 import { ConfigService } from '@nestjs/config';
+import { CheckEmailUniqueDto } from '../dto/checkEmailUniqueDto';
+import { CheckUsernameUniqueDto } from '../dto/checkUsernameDto';
+import { UpdateUserInfoDto } from '../dto/updateUserInfoDto';
+import { Not } from 'typeorm';
 
 @Injectable()
 export class AuthService {
@@ -25,8 +29,25 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  signUp(createUserDto: CreateUserDto): Promise<void> {
-    return this.userRepository.createUser(createUserDto);
+  async signUp(createUserDto: CreateUserDto) {
+    try {
+      const isUniqueEmail = await this.checkEmailUnique({
+        email: createUserDto.email,
+      });
+      const isUniqueUsername = await this.checkUsernameUnique({
+        username: createUserDto.username,
+      });
+
+      if (!isUniqueEmail)
+        throw new BadRequestException('Email is already in use');
+
+      if (!isUniqueUsername)
+        throw new BadRequestException('Username is already in use');
+
+      return this.userRepository.createUser(createUserDto);
+    } catch (err) {
+      return err;
+    }
   }
 
   async validateUser(loginUserDto: LoginUserDto) {
@@ -45,12 +66,12 @@ export class AuthService {
 
   async generateAccessToken(user: User) {
     const payload = { user: user.username, email: user.email };
-    return this.jwtService.signAsync(payload);
+    return await this.jwtService.signAsync(payload);
   }
 
   async generateRefreshToken(user: User) {
     const payload = { id: user.id };
-    return this.jwtService.signAsync(payload, {
+    return await this.jwtService.signAsync(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET'),
       expiresIn: this.configService.get('JWT_REFRESH_EXPIRESIN'),
     });
@@ -80,6 +101,41 @@ export class AuthService {
     );
 
     return currentRefreshTokenExp;
+  }
+
+  async checkEmailUnique(checkEmailUniqueDto: CheckEmailUniqueDto) {
+    let isUnique = false;
+    const { email } = checkEmailUniqueDto;
+    const user = await this.userRepository.findOneBy({ email });
+
+    if (!user) isUnique = true;
+
+    return isUnique;
+  }
+
+  async checkUsernameUnique(checkUsernameUnique: CheckUsernameUniqueDto) {
+    let isUnique = false;
+    const { username } = checkUsernameUnique;
+    const user = await this.userRepository.findOneBy({ username });
+
+    if (!user) isUnique = true;
+
+    return isUnique;
+  }
+
+  async updateUserInfo(updateUserInfo: UpdateUserInfoDto, userId: number) {
+    const { username, profileImagePath } = updateUserInfo;
+    const existedUsername = await this.userRepository.findOne({
+      where: { username: username, id: Not(userId) },
+    });
+
+    if (existedUsername)
+      throw new BadRequestException('Username is already in use');
+
+    await this.userRepository.update(userId, {
+      username,
+      profileImagePath,
+    });
   }
 
   async getAccessTokenByOAuth(email: string): Promise<{ accessToken: string }> {

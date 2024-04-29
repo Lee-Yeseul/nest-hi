@@ -14,7 +14,7 @@ export class Place extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'address_name', unique: true })
+  @Column({ unique: true })
   addressName: string;
 
   //   enum으로 변경하기

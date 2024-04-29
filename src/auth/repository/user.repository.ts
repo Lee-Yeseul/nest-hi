@@ -15,15 +15,15 @@ export class UserRepository extends Repository<User> {
     super(User, dataSourse.createEntityManager());
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<void> {
-    const { email, password, confirmPassword } = createUserDto;
+  async createUser(createUserDto: CreateUserDto) {
+    const { email, password, confirmPassword, username } = createUserDto;
 
     if (password !== confirmPassword)
       throw new BadRequestException('Passwords do not match');
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-    const user = this.create({ email, password: hashedPassword });
+    const user = this.create({ email, password: hashedPassword, username });
 
     try {
       await this.save(user);
