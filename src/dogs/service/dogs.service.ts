@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -7,6 +8,8 @@ import {
 import { DogRepository } from '../repository/dogs.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateDogDto } from '../dto/createDogDto';
+import { CreateDogProfileDto } from '../dto/createDogProfileDto';
+import { UpdateDogDto } from '../dto/updateDogDto';
 
 @Injectable()
 export class DogsService {
@@ -20,10 +23,56 @@ export class DogsService {
     const existingDog = await this.dogRepository.findOne({
       where: { ownerId, name },
     });
+
     if (existingDog) {
-      throw new Error('Dog already exists with this name');
+      throw new BadRequestException('Dog already exists with this name');
     }
     return await this.dogRepository.createDog(createDogDto, ownerId);
+  }
+
+  async createDogProfile(
+    id: number,
+    createDogProfileDto: CreateDogProfileDto,
+    ownerId: number,
+  ) {
+    const dog = await this.dogRepository.findOneBy({ id });
+    if (!dog) {
+      throw new NotFoundException('Dog not found');
+    }
+    if (dog.ownerId !== ownerId) {
+      throw new ForbiddenException(
+        'You are not authorized to create profile for this dog',
+      );
+    }
+    return await this.dogRepository.saveDogProfile(id, createDogProfileDto);
+  }
+
+  async updateDog(id: number, updateDogDto: UpdateDogDto, userId: number) {
+    const dog = await this.dogRepository.findOneBy({ id });
+    if (!dog) {
+      throw new NotFoundException('Dog not found');
+    }
+    if (dog.ownerId !== userId) {
+      throw new ForbiddenException('You are not authorized to update this dog');
+    }
+    return await this.dogRepository.updateDog(id, updateDogDto);
+  }
+
+  async updateDogProfile(
+    userId: number,
+    id: number,
+    updateDogDto: CreateDogProfileDto,
+  ) {
+    const dog = await this.dogRepository.findOneBy({ id });
+    if (!dog) {
+      throw new NotFoundException('Dog not found');
+    }
+    if (dog.ownerId !== userId) {
+      throw new ForbiddenException(
+        'You are not authorized to update profile for this dog',
+      );
+    }
+    return await this.dogRepository.saveDogProfile(id, updateDogDto);
   }
 
   async getDogs() {

@@ -2,6 +2,8 @@ import { DataSource, Repository } from 'typeorm';
 import { Dog } from '../entity/dog.entity';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateDogDto } from '../dto/createDogDto';
+import { CreateDogProfileDto } from '../dto/createDogProfileDto';
+import { UpdateDogDto } from '../dto/updateDogDto';
 
 @Injectable()
 export class DogRepository extends Repository<Dog> {
@@ -9,12 +11,35 @@ export class DogRepository extends Repository<Dog> {
     super(Dog, dataSource.createEntityManager());
   }
 
-  async createDog(createDogDto: CreateDogDto, ownerId: number): Promise<Dog> {
+  async createDog(createDogDto: CreateDogDto, ownerId: number) {
     const { name, breed, age } = createDogDto;
     const dog = this.create({ name, breed, age, ownerId });
     try {
       await this.save(dog);
       return dog;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('something went wrong');
+    }
+  }
+
+  async saveDogProfile(id: number, createDogProfileDto: CreateDogProfileDto) {
+    const { imagePath } = createDogProfileDto;
+    try {
+      await this.update({ id }, { imagePath });
+      return 'profile created successfully';
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('something went wrong');
+    }
+  }
+
+  async updateDog(id: number, updateDogDto: UpdateDogDto) {
+    const { name, breed, age } = updateDogDto;
+    try {
+      await this.update({ id }, { name, breed, age });
+
+      return 'dog updated successfully';
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('something went wrong');
