@@ -8,6 +8,7 @@ import { JWTAccess } from './passport/jwtAccess.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JWTRefresh } from './passport/jwtRefresh.strategy';
+import { UserFollowersRepository } from './repository/userFollowers.repository';
 
 @Module({
   imports: [
@@ -25,7 +26,13 @@ import { JWTRefresh } from './passport/jwtRefresh.strategy';
     HttpModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserRepository, JWTAccess, JWTRefresh],
+  providers: [
+    AuthService,
+    UserRepository,
+    UserFollowersRepository,
+    JWTAccess,
+    JWTRefresh,
+  ],
   exports: [JWTAccess, JWTRefresh, PassportModule],
 })
 export class AuthModule {}

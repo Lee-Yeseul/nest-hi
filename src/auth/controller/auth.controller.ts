@@ -1,7 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
+  Get,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Put,
   Req,
@@ -27,6 +31,8 @@ import { ConfigService } from '@nestjs/config';
 import { CheckEmailUniqueDto } from '../dto/checkEmailUniqueDto';
 import { UpdateUserInfoDto } from '../dto/updateUserInfoDto';
 import { CheckUsernameUniqueDto } from '../dto/checkUsernameDto';
+import { User } from '../entity/user.entity';
+import { GetUser } from '../decorator/getUser.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -131,6 +137,45 @@ export class AuthController {
     return this.authService.updateUserInfo(updateUserInfo, user.id);
   }
 
+  @Post('/follow/:id')
+  @UseGuards(AuthGuard('jwt'))
+  async postFollow(
+    @Param('id') followeeId: number,
+    @GetUser() user: User,
+    @Res() res: Response,
+  ) {
+    const result = await this.authService.followUser(followeeId, user.id);
+    return res.status(HttpStatus.CREATED).json(result);
+  }
+
+  @Get('follow/me')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowers(@GetUser() user: User) {
+    return await this.authService.getFollowers(user.id);
+  }
+
+  @Patch('/follow/:id/confirm')
+  @UseGuards(AuthGuard('jwt'))
+  async patchFollowConfirm(
+    @Param('id') followerId: number,
+    @GetUser() user: User,
+  ) {
+    await this.authService.confirmFollow(followerId, user.id);
+
+    await this.authService.followUser(followerId, user.id);
+
+    await this.authService.confirmFollow(user.id, followerId);
+  }
+
+  @Delete('/follow/:id')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteFollow(@Param('id') followerId: number, @GetUser() user: User) {
+    await this.authService.deleteFollow(followerId, user.id);
+  }
+
+  /**
+   * 작업 전
+   */
   @Post('/kakao-code')
   async kakaoLogin(
     @Body() code: { code: string },

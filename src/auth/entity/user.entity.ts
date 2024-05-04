@@ -11,6 +11,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { UserFollowers } from './userFollowers.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -55,6 +56,21 @@ export class User extends BaseEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  // // 내가 팔로우하고 있는 사람들
+  // @ManyToMany(() => User, (user) => user.followees)
+  // @JoinTable()
+  // followers: User[];
+
+  // // 나를 팔로우하고 있는 사람들
+  // @ManyToMany(() => User, (user) => user.followers)
+  // followees: User[];
+
+  @OneToMany(() => UserFollowers, (ufm) => ufm.follower)
+  followers: UserFollowers[];
+
+  @OneToMany(() => UserFollowers, (ufm) => ufm.followee)
+  followees: UserFollowers[];
 
   @UpdateDateColumn()
   updatedAt: Date;
