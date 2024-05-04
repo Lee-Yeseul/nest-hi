@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { DogPost } from '../entity/dogPost.entity';
 import { CreateDogPostDto } from '../dto/createDogPostDto';
+import { UpdateDogPostDto } from '../dto/updateDogPostDto';
 
 @Injectable()
 export class DogPostRepository extends Repository<DogPost> {
@@ -26,6 +27,22 @@ export class DogPostRepository extends Repository<DogPost> {
       await this.save(post);
       return post;
     } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException('something went wrong');
+    }
+  }
+
+  async updateDogPost(id: number, updateDogPostDto: UpdateDogPostDto) {
+    const { title, content, tags, primaryActivityZone, dogId } =
+      updateDogPostDto;
+    try {
+      await this.update(
+        { id },
+        { title, content, tags, primaryActivityZone, dogId },
+      );
+      return 'post updated successfully';
+    } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException('something went wrong');
     }
   }

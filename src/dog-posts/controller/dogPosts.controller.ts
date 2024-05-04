@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Res,
   UseGuards,
   ValidationPipe,
@@ -17,6 +18,7 @@ import { GetUser } from 'src/auth/decorator/getUser.decorator';
 import { User } from 'src/auth/entity/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
+import { UpdateDogPostDto } from '../dto/updateDogPostDto';
 
 @ApiTags('dog-posts')
 @Controller('dog-posts')
@@ -39,6 +41,27 @@ export class DogPostsController {
     return res.status(HttpStatus.CREATED).json(result);
   }
 
+  @Put('/:id')
+  @ApiOperation({
+    summary: '게시글 수정',
+  })
+  @ApiParam({ name: 'id', example: 1 })
+  @UseGuards(AuthGuard('jwt'))
+  async updateDogPost(
+    @Param('id') id: number,
+    @Body(ValidationPipe) updateDogPostDto: UpdateDogPostDto,
+    @GetUser() user: User,
+    @Res() res: Response,
+  ) {
+    const { id: userId } = user;
+    const result = await this.dogsService.updateDogPost(
+      id,
+      updateDogPostDto,
+      userId,
+    );
+    return res.status(HttpStatus.OK).json(result);
+  }
+
   @ApiOperation({
     summary: '게시글 전체 가져오기',
   })
@@ -47,8 +70,15 @@ export class DogPostsController {
     return await this.dogsService.getDogPosts();
   }
 
+  @ApiOperation({ summary: '유저 게시글 가져오기' })
+  @UseGuards(AuthGuard('jwt'))
+  @Get('/user')
+  async getDogPostsByUserId(@GetUser() user: User) {
+    return await this.dogsService.getDogPostsByUserId(user.id);
+  }
+
   @ApiOperation({
-    summary: '게시글 전체 가져오기',
+    summary: '게시글 하나 가져오기',
   })
   @ApiParam({ name: 'id', example: 1 })
   @Get('/:id')
