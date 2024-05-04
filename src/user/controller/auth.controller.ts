@@ -1,13 +1,8 @@
 import {
   Body,
   Controller,
-  Delete,
-  Get,
   HttpStatus,
-  Param,
-  Patch,
   Post,
-  Put,
   Req,
   Res,
   UnauthorizedException,
@@ -29,10 +24,7 @@ import {
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { CheckEmailUniqueDto } from '../dto/checkEmailUniqueDto';
-import { UpdateUserInfoDto } from '../dto/updateUserInfoDto';
 import { CheckUsernameUniqueDto } from '../dto/checkUsernameDto';
-import { User } from '../entity/user.entity';
-import { GetUser } from '../decorator/getUser.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -125,52 +117,6 @@ export class AuthController {
     @Body(ValidationPipe) checkUsernameUniqueDto: CheckUsernameUniqueDto,
   ) {
     return this.authService.checkUsernameUnique(checkUsernameUniqueDto);
-  }
-
-  @Put('/user-info')
-  @UseGuards(AuthGuard('jwt'))
-  async updateUserInfo(
-    @Req() req,
-    @Body(ValidationPipe) updateUserInfo: UpdateUserInfoDto,
-  ) {
-    const { user } = req;
-    return this.authService.updateUserInfo(updateUserInfo, user.id);
-  }
-
-  @Post('/follow/:id')
-  @UseGuards(AuthGuard('jwt'))
-  async postFollow(
-    @Param('id') followeeId: number,
-    @GetUser() user: User,
-    @Res() res: Response,
-  ) {
-    const result = await this.authService.followUser(followeeId, user.id);
-    return res.status(HttpStatus.CREATED).json(result);
-  }
-
-  @Get('follow/me')
-  @UseGuards(AuthGuard('jwt'))
-  async getFollowers(@GetUser() user: User) {
-    return await this.authService.getFollowers(user.id);
-  }
-
-  @Patch('/follow/:id/confirm')
-  @UseGuards(AuthGuard('jwt'))
-  async patchFollowConfirm(
-    @Param('id') followerId: number,
-    @GetUser() user: User,
-  ) {
-    await this.authService.confirmFollow(followerId, user.id);
-
-    await this.authService.followUser(followerId, user.id);
-
-    await this.authService.confirmFollow(user.id, followerId);
-  }
-
-  @Delete('/follow/:id')
-  @UseGuards(AuthGuard('jwt'))
-  async deleteFollow(@Param('id') followerId: number, @GetUser() user: User) {
-    await this.authService.deleteFollow(followerId, user.id);
   }
 
   /**

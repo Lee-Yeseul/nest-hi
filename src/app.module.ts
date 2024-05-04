@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from './configs/typeorm.config';
-import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
@@ -17,7 +17,7 @@ import { WalkHistoriesModule } from './walk-histories/walkHistories.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot(typeORMConfig),
-    AuthModule,
+    UserModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

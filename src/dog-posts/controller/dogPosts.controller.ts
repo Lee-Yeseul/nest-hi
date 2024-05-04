@@ -14,8 +14,8 @@ import {
 import { ApiBody, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { DogPostsService } from '../service/dogPosts.service';
 import { CreateDogPostDto } from '../dto/createDogPostDto';
-import { GetUser } from 'src/auth/decorator/getUser.decorator';
-import { User } from 'src/auth/entity/user.entity';
+import { GetUser } from 'src/user/decorator/getUser.decorator';
+import { User } from 'src/user/entity/user.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { UpdateDogPostDto } from '../dto/updateDogPostDto';

@@ -1,4 +1,4 @@
-import { User } from 'src/auth/entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { WalkHistory } from 'src/walk-histories/entity/walkHistory.entity';
 import {
   BaseEntity,

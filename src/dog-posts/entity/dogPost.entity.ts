@@ -1,4 +1,4 @@
-import { User } from 'src/auth/entity/user.entity';
+import { User } from 'src/user/entity/user.entity';
 import { Dog } from 'src/dogs/entity/dog.entity';
 import {
   BaseEntity,
