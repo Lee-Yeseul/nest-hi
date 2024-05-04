@@ -1,10 +1,12 @@
 import { User } from 'src/auth/entity/user.entity';
+import { WalkHistory } from 'src/walk-histories/entity/walkHistory.entity';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -28,6 +30,9 @@ export class Dog extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.dogs)
   owner: User;
+
+  @OneToMany(() => WalkHistory, (walkHistory) => walkHistory.dog)
+  walkHistories: WalkHistory[];
 
   @Column()
   ownerId: number;

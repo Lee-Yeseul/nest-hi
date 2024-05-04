@@ -1,4 +1,5 @@
 import { User } from 'src/auth/entity/user.entity';
+import { Dog } from 'src/dogs/entity/dog.entity';
 import { Place } from 'src/places/entity/place.entity';
 import {
   BaseEntity,
@@ -15,17 +16,33 @@ export class WalkHistory extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   imagePath: string;
 
   @ManyToOne(() => User)
   user: User;
 
+  @Column()
+  userId: number;
+
   @ManyToOne(() => Place)
   place: Place;
 
+  @Column({ nullable: true })
+  placeId: number;
+
+  // 날짜
   @Column()
-  Date: Date;
+  date: Date;
+
+  @Column()
+  oneLineComment: string;
+
+  @ManyToOne(() => Dog)
+  dog: Dog;
+
+  @Column()
+  dogId: number;
 
   @CreateDateColumn()
   createdAt: Date;
