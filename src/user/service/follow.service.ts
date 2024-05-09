@@ -13,14 +13,21 @@ export class FollowService {
   ) {}
 
   async followUser(followeeId: number, followerId: number) {
+    if (followeeId === followerId)
+      throw new NotFoundException('cannot follow yourself');
+    const follow = await this.userFollowersRepository.findOne({
+      where: { follower: { id: followerId }, followee: { id: followeeId } },
+    });
+    if (follow) throw new NotFoundException('already following');
+
     const result = await this.userFollowersRepository.save({
       follower: { id: followerId },
       followee: { id: followeeId },
     });
-    return result;
+    return { id: result.id };
   }
 
-  async getFollowers(userId: number) {
+  async getMutualFollowers(userId: number) {
     const result = await this.userFollowersRepository.find({
       where: {
         followee: { id: userId },
@@ -29,7 +36,39 @@ export class FollowService {
       relations: { follower: true, followee: true },
     });
 
-    return result.map((x) => x.follower); // follower만 뽑아서 리스트만들기
+    return result.map((x) => {
+      const { id, username, profileImagePath } = x.follower;
+      return { id, username, profileImagePath };
+    });
+  }
+
+  async getFollowers(userId: number) {
+    console.log(userId);
+    const result = await this.userFollowersRepository.find({
+      where: {
+        followee: { id: userId },
+      },
+
+      relations: { follower: true, followee: true },
+    });
+
+    return result.map((x) => {
+      const { id, username, profileImagePath } = x.follower;
+      return { id, username, profileImagePath };
+    });
+  }
+  async getFollowees(userId: number) {
+    const result = await this.userFollowersRepository.find({
+      where: {
+        follower: { id: userId },
+      },
+      relations: { follower: true, followee: true },
+    });
+
+    return result.map((x) => {
+      const { id, username, profileImagePath } = x.follower;
+      return { id, username, profileImagePath };
+    });
   }
 
   async confirmFollow(followerId: number, followeeId: number) {
@@ -41,7 +80,6 @@ export class FollowService {
     if (!follow) throw new NotFoundException('not existing follow');
 
     await this.userFollowersRepository.update(follow.id, { isConfirmed: true });
-    return true;
   }
 
   async deleteFollow(followerId: number, followeeId: number) {
@@ -52,6 +90,5 @@ export class FollowService {
     if (!follow) throw new NotFoundException('not existing follow');
 
     await this.userFollowersRepository.delete(follow.id);
-    return true;
   }
 }

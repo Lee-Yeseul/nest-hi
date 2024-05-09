@@ -25,7 +25,7 @@ export class DogPostRepository extends Repository<DogPost> {
       });
 
       await this.save(post);
-      return post;
+      return { id: post.id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('something went wrong');
@@ -40,7 +40,7 @@ export class DogPostRepository extends Repository<DogPost> {
         { id },
         { title, content, tags, primaryActivityZone, dogId },
       );
-      return 'post updated successfully';
+      return { id: id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('something went wrong');

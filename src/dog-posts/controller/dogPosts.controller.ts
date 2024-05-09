@@ -66,15 +66,17 @@ export class DogPostsController {
     summary: '게시글 전체 가져오기',
   })
   @Get()
-  async getDogPosts() {
-    return await this.dogsService.getDogPosts();
+  async getDogPosts(@Res() res: Response) {
+    const result = await this.dogsService.getDogPosts();
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @ApiOperation({ summary: '유저 게시글 가져오기' })
   @UseGuards(AuthGuard('jwt'))
-  @Get('/user')
-  async getDogPostsByUserId(@GetUser() user: User) {
-    return await this.dogsService.getDogPostsByUserId(user.id);
+  @Get('/me')
+  async getDogPostsByUserId(@GetUser() user: User, @Res() res: Response) {
+    const result = await this.dogsService.getDogPostsByUserId(user.id);
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @ApiOperation({
@@ -82,8 +84,9 @@ export class DogPostsController {
   })
   @ApiParam({ name: 'id', example: 1 })
   @Get('/:id')
-  async getDogPostById(@Param('id') id: number) {
-    return await this.dogsService.getDogPostById(id);
+  async getDogPostById(@Param('id') id: number, @Res() res: Response) {
+    const result = await this.dogsService.getDogPostById(id);
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @ApiOperation({

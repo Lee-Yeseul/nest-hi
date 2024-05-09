@@ -1,8 +1,10 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from '../repository/user.repository';
@@ -47,7 +49,7 @@ export class AuthService {
 
       return this.userRepository.createUser(createUserDto);
     } catch (err) {
-      return err;
+      throw new InternalServerErrorException();
     }
   }
 
@@ -56,12 +58,12 @@ export class AuthService {
       const { email, password } = loginUserDto;
 
       const user = await this.userRepository.findOneBy({ email });
-      if (!user) throw new NotFoundException();
+      if (!user) throw new NotFoundException('user not found');
       if (!(await bcrypt.compare(password, user.password)))
-        throw new BadRequestException('Invalid credentials');
+        throw new UnauthorizedException('Invalid credentials');
       return user;
     } catch (error) {
-      throw new Error(error);
+      throw error;
     }
   }
 

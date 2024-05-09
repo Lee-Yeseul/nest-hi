@@ -9,10 +9,10 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 import { User } from '../entity/user.entity';
 import { GetUser } from '../decorator/getUser.decorator';
 import { FollowService } from '../service/follow.service';
@@ -20,10 +20,7 @@ import { FollowService } from '../service/follow.service';
 @ApiTags('follow')
 @Controller('follow')
 export class FollowController {
-  constructor(
-    private readonly followService: FollowService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly followService: FollowService) {}
 
   @Post('/:id')
   @UseGuards(AuthGuard('jwt'))
@@ -36,10 +33,28 @@ export class FollowController {
     return res.status(HttpStatus.CREATED).json(result);
   }
 
-  @Get('/me')
+  // 맞팔
+  @Get('/mutual-followers')
   @UseGuards(AuthGuard('jwt'))
-  async getFollowers(@GetUser() user: User) {
-    return await this.followService.getFollowers(user.id);
+  async getMutualFollowers(@GetUser() user: User, @Res() res: Response) {
+    const result = await this.followService.getMutualFollowers(user.id);
+    return res.status(HttpStatus.CREATED).json(result);
+  }
+
+  // 나를 팔로우하는 사람들
+  @Get('/followers')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowers(@GetUser() user: User, @Res() res: Response) {
+    const result = await this.followService.getFollowers(user.id);
+    return res.status(HttpStatus.CREATED).json(result);
+  }
+
+  // 내가 팔로우하는 사람들
+  @Get('/followees')
+  @UseGuards(AuthGuard('jwt'))
+  async getFollowees(@GetUser() user: User, @Res() res: Response) {
+    const result = await this.followService.getFollowees(user.id);
+    return res.status(HttpStatus.CREATED).json(result);
   }
 
   @Patch('/:id/confirm')
@@ -47,15 +62,23 @@ export class FollowController {
   async patchFollowConfirm(
     @Param('id') followerId: number,
     @GetUser() user: User,
+    @Res() res: Response,
   ) {
     await this.followService.confirmFollow(followerId, user.id);
     await this.followService.followUser(followerId, user.id);
     await this.followService.confirmFollow(user.id, followerId);
+    const result = { message: 'success' };
+    return res.status(HttpStatus.CREATED).json(result);
   }
 
   @Delete('/:id')
   @UseGuards(AuthGuard('jwt'))
-  async deleteFollow(@Param('id') followerId: number, @GetUser() user: User) {
-    await this.followService.deleteFollow(followerId, user.id);
+  async deleteFollow(
+    @Param('id') followerId: number,
+    @GetUser() user: User,
+    @Res() res: Response,
+  ) {
+    const result = await this.followService.deleteFollow(followerId, user.id);
+    return res.status(HttpStatus.CREATED).json(result);
   }
 }

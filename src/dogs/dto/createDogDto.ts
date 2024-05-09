@@ -4,7 +4,7 @@ import { dogBreeds } from 'src/constants/dogBreeds';
 
 export class CreateDogDto {
   @ApiProperty({ description: '강아지 이름', default: '슈' })
-  @MaxLength(10)
+  @MaxLength(8)
   @IsString()
   name: string;
 

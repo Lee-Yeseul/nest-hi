@@ -16,7 +16,8 @@ export class DogRepository extends Repository<Dog> {
     const dog = this.create({ name, breed, age, ownerId });
     try {
       await this.save(dog);
-      return dog;
+      const { id } = dog;
+      return { id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('something went wrong');
@@ -27,7 +28,7 @@ export class DogRepository extends Repository<Dog> {
     const { imagePath } = createDogProfileDto;
     try {
       await this.update({ id }, { imagePath });
-      return 'profile created successfully';
+      return { id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('something went wrong');
@@ -39,7 +40,7 @@ export class DogRepository extends Repository<Dog> {
     try {
       await this.update({ id }, { name, breed, age });
 
-      return 'dog updated successfully';
+      return { id };
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException('something went wrong');

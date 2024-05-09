@@ -6,13 +6,12 @@ import { UserModule } from './user/user.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
-
 import { DogsModule } from './dogs/dogs.module';
 import { PlacesModule } from './places/places.module';
 import { PlaceHistoriesModule } from './place-histories/placeHistories.module';
-
 import { DogPostsModule } from './dog-posts/dogPosts.module';
 import { WalkHistoriesModule } from './walk-histories/walkHistories.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -26,6 +25,7 @@ import { WalkHistoriesModule } from './walk-histories/walkHistories.module';
     PlaceHistoriesModule,
     DogPostsModule,
     WalkHistoriesModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

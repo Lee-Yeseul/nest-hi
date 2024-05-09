@@ -74,19 +74,42 @@ export class DogsController {
     @Param('id') id: number,
     @Body() updateDogDto: CreateDogProfileDto,
     @GetUser() user: User,
+    @Res() res: Response,
   ) {
     const { id: userId } = user;
-    return await this.dogsService.updateDogProfile(userId, id, updateDogDto);
+    const result = await this.dogsService.updateDogProfile(
+      userId,
+      id,
+      updateDogDto,
+    );
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @Get('/list')
-  async getDogs() {
-    return await this.dogsService.getDogs();
+  async getDogs(@Res() res: Response) {
+    const result = await this.dogsService.getDogs();
+    return res.status(HttpStatus.OK).json(result);
+  }
+
+  @Get('/me')
+  @UseGuards(AuthGuard('jwt'))
+  async getMyDogs(@GetUser() user: User, @Res() res: Response) {
+    const { id } = user;
+    const result = await this.dogsService.getMyDogs(id);
+    return res.status(HttpStatus.OK).json(result);
+  }
+
+  @Get('/breeds')
+  async getBreeds(@Res() res: Response) {
+    console.log('hi');
+    const result = await this.dogsService.getBreeds();
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @Get('/:id')
-  async getDogById(@Param('id') id: number) {
-    return await this.dogsService.getDogById(id);
+  async getDogById(@Param('id') id: number, @Res() res: Response) {
+    const result = await this.dogsService.getDogById(id);
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -11,6 +11,13 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
+  async getUserInfo(userId: number) {
+    const currentUserInfo = await this.userRepository.findOneBy({ id: userId });
+    if (!currentUserInfo) throw new BadRequestException('User not found');
+    const { username, profileImagePath, email } = currentUserInfo;
+    return { username, profileImagePath, email };
+  }
+
   async updateUserInfo(updateUserInfo: UpdateUserInfoDto, userId: number) {
     const { username, profileImagePath } = updateUserInfo;
     const existedUsername = await this.userRepository.findOne({

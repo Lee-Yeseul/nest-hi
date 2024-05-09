@@ -72,7 +72,7 @@ export class WalkHistoriesController {
       id,
       updateWalkHistoryDto,
     );
-    return res.status(HttpStatus.CREATED).json(result);
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @Put('/:id/image')
@@ -81,25 +81,36 @@ export class WalkHistoriesController {
     @Param('id') id: number,
     @Body() updateWalkHistoryImageDto: CreateWalkHistoryImageDto,
     @GetUser() user: User,
+    @Res() res: Response,
   ) {
     const { id: userId } = user;
-    return await this.walkHistoriesService.updateWalkHistoryImage(
+    const result = await this.walkHistoriesService.updateWalkHistoryImage(
       userId,
       id,
       updateWalkHistoryImageDto,
     );
+    return res.status(HttpStatus.OK).json(result);
   }
 
-  @Get()
+  @Get('/list')
   @UseGuards(AuthGuard('jwt'))
-  async getWalkHistories(@GetUser() user: User) {
-    return await this.walkHistoriesService.getWalkHistories(user.id);
+  async getWalkHistories(@GetUser() user: User, @Res() res: Response) {
+    const result = await this.walkHistoriesService.getWalkHistories(user.id);
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @Get('/:id')
   @UseGuards(AuthGuard('jwt'))
-  async getWalkHistoryById(@Param('id') id: number, @GetUser() user: User) {
-    return await this.walkHistoriesService.getWalkHistoryById(user.id, id);
+  async getWalkHistoryById(
+    @Param('id') id: number,
+    @GetUser() user: User,
+    @Res() res: Response,
+  ) {
+    const result = await this.walkHistoriesService.getWalkHistoryById(
+      user.id,
+      id,
+    );
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @Delete('/:id')

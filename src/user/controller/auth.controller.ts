@@ -5,7 +5,6 @@ import {
   Post,
   Req,
   Res,
-  UnauthorizedException,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
@@ -41,8 +40,12 @@ export class AuthController {
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({ status: 201, description: '회원가입에 성공했습니다.' })
   @ApiResponse({ status: 404, description: '회원가입에 실패했습니다.' })
-  async signUp(@Body(ValidationPipe) createUserDto: CreateUserDto) {
-    return await this.authService.signUp(createUserDto);
+  async signUp(
+    @Body(ValidationPipe) createUserDto: CreateUserDto,
+    @Res() res: Response,
+  ) {
+    const result = await this.authService.signUp(createUserDto);
+    return res.status(HttpStatus.CREATED).json(result);
   }
 
   @Post('/signin')
@@ -64,7 +67,7 @@ export class AuthController {
   @ApiUnauthorizedResponse()
   async signIn(
     @Body(ValidationPipe) loginUserDto: LoginUserDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res() res: Response,
   ) {
     const user = await this.authService.validateUser(loginUserDto);
     const accessToken = await this.authService.generateAccessToken(user);
@@ -74,7 +77,9 @@ export class AuthController {
     res.cookie('refresh_token', refreshToken, {
       httpOnly: true,
     });
-    return { message: 'login success', accessToken };
+
+    const result = { message: 'login success', accessToken };
+    return res.status(HttpStatus.CREATED).json(result);
   }
 
   @Post('/renew')
@@ -94,29 +99,33 @@ export class AuthController {
   })
   @UseGuards(AuthGuard('refresh'))
   async renewAccessToken(@Req() req, @Res() res: Response) {
-    try {
-      const { user } = req;
-      const newAccessToken = await this.authService.generateAccessToken(user);
-      return res.status(HttpStatus.OK).json({
-        newAccessToken: newAccessToken,
-      });
-    } catch (err) {
-      throw new UnauthorizedException('invalid refresh token');
-    }
+    const { user } = req;
+    const newAccessToken = await this.authService.generateAccessToken(user);
+
+    const result = {
+      newAccessToken: newAccessToken,
+    };
+    return res.status(HttpStatus.CREATED).json(result);
   }
 
   @Post('/is-email-unique')
   async checkEmailUnique(
     @Body(ValidationPipe) checkEmailUniqueDto: CheckEmailUniqueDto,
+    @Res() res: Response,
   ) {
-    return this.authService.checkEmailUnique(checkEmailUniqueDto);
+    const result = await this.authService.checkEmailUnique(checkEmailUniqueDto);
+    return res.status(HttpStatus.OK).json(result);
   }
 
   @Post('/is-username-unique')
   async checkUsernameUnique(
     @Body(ValidationPipe) checkUsernameUniqueDto: CheckUsernameUniqueDto,
+    @Res() res: Response,
   ) {
-    return this.authService.checkUsernameUnique(checkUsernameUniqueDto);
+    const result = await this.authService.checkUsernameUnique(
+      checkUsernameUniqueDto,
+    );
+    return res.status(HttpStatus.OK).json(result);
   }
 
   /**

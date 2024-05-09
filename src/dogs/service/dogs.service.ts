@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateDogDto } from '../dto/createDogDto';
 import { CreateDogProfileDto } from '../dto/createDogProfileDto';
 import { UpdateDogDto } from '../dto/updateDogDto';
+import { dogBreeds } from 'src/constants/dogBreeds';
 
 @Injectable()
 export class DogsService {
@@ -79,12 +80,20 @@ export class DogsService {
     return await this.dogRepository.find();
   }
 
+  async getMyDogs(userId: number) {
+    return await this.dogRepository.find({ where: { ownerId: userId } });
+  }
+
   async getDogById(id: number) {
     const dog = await this.dogRepository.findOneBy({ id });
     if (!dog) {
       throw new NotFoundException('Dog not found');
     }
     return dog;
+  }
+
+  async getBreeds() {
+    return { dogBreeds };
   }
 
   async deleteDog(id: number, userId: number) {

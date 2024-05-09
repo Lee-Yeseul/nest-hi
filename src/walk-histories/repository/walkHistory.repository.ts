@@ -19,7 +19,7 @@ export class WalkHistoriesRepository extends Repository<WalkHistory> {
       ...createWalkHistoryDto,
     });
     await this.save(walkHistory);
-    return walkHistory;
+    return { id: walkHistory.id };
   }
 
   async saveWalkHistoryImage(
@@ -29,7 +29,7 @@ export class WalkHistoriesRepository extends Repository<WalkHistory> {
     const { imagePath } = createWalkHistoryImageDto;
     try {
       await this.update({ id }, { imagePath });
-      return 'profile created successfully';
+      return { id };
     } catch (error) {
       throw new InternalServerErrorException('something went wrong');
     }
@@ -42,7 +42,7 @@ export class WalkHistoriesRepository extends Repository<WalkHistory> {
     const { oneLineComment, placeId } = updateWalkHistoryDto;
     try {
       await this.update({ id }, { oneLineComment, placeId });
-      return 'walk history updated successfully';
+      return { id };
     } catch (error) {
       throw new InternalServerErrorException('something went wrong');
     }
