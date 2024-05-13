@@ -34,7 +34,7 @@ export class DogPost extends BaseEntity {
   primaryActivityZone?: string;
 
   @ManyToOne(() => Dog)
-  Dog: Dog;
+  dog: Dog;
 
   @Column()
   dogId: number;

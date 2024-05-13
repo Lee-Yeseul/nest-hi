@@ -12,13 +12,17 @@ export class JWTAccess extends PassportStrategy(Strategy, 'jwt') {
   ) {
     super({
       secretOrKey: process.env.JWT_SECRET,
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request) => {
+          return request.cookies.access_token;
+        },
+      ]),
+      passReqToCallback: true,
     });
   }
 
   async validate(payload) {
     const { email } = payload;
-
     const user: User = await this.userRepository.findOneBy({ email });
     if (!user) {
       throw new UnauthorizedException('invalid access token');

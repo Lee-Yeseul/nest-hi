@@ -65,7 +65,7 @@ export class DogPostsController {
   @ApiOperation({
     summary: '게시글 전체 가져오기',
   })
-  @Get()
+  @Get('/list')
   async getDogPosts(@Res() res: Response) {
     const result = await this.dogsService.getDogPosts();
     return res.status(HttpStatus.OK).json(result);

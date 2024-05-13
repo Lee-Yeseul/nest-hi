@@ -35,15 +35,36 @@ export class ChatGateway
 
   handleConnection(client: any, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
+    // console.log(client);
   }
 
-  @SubscribeMessage('test')
-  handleMessage(
-    @MessageBody() data: string,
+  @SubscribeMessage('join-room')
+  handleJoinRoom(
+    @MessageBody() data: { roomId: string },
     @ConnectedSocket() client: Socket,
-  ): string {
-    console.log('payload', data);
+  ) {
+    const { roomId } = data;
+    client.join(roomId);
+  }
 
-    return 'Hello world!';
+  @SubscribeMessage('send-message')
+  handleSendMessage(
+    @MessageBody()
+    data: {
+      message: string;
+      roomId: string;
+      senderId: string;
+      timestamp: string;
+    },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { message } = data;
+
+    this.server.to(data.roomId).emit('new-message', {
+      message,
+      type: 'me',
+      senderId: data.senderId,
+      timestamp: data.timestamp,
+    });
   }
 }

@@ -61,16 +61,24 @@ export class DogPostsService {
   }
 
   async getDogPosts() {
-    return await this.dogPostRepository.find();
+    return await this.dogPostRepository.find({
+      relations: ['dog'],
+    });
   }
 
   async getDogPostsByUserId(userId: number) {
-    return await this.dogPostRepository.find({ where: { authorId: userId } });
+    return await this.dogPostRepository.find({
+      where: { authorId: userId },
+      relations: ['dog'],
+    });
   }
 
   async getDogPostById(id: number) {
     try {
-      const post = await this.dogPostRepository.findOneBy({ id });
+      const post = await this.dogPostRepository.findOne({
+        where: { id },
+        relations: ['dog'],
+      });
       if (!post) {
         throw new NotFoundException('Dog post not found');
       }

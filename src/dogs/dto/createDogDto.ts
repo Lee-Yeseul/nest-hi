@@ -8,7 +8,7 @@ export class CreateDogDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ description: '견종', default: '말티즈' })
+  @ApiProperty({ description: '견종', default: '소형견' })
   @IsString()
   @IsIn(Object.keys(dogBreeds))
   breed: keyof typeof dogBreeds;

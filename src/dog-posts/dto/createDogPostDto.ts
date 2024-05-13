@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsNumber, IsString } from 'class-validator';
+import {
+  ArrayMaxSize,
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateDogPostDto {
   @ApiProperty({ description: '강아지 id', default: 1 })
@@ -21,5 +27,6 @@ export class CreateDogPostDto {
 
   @ApiProperty({ description: '주 활동 영역', default: '도봉구 방학동' })
   @IsString()
+  @IsOptional()
   primaryActivityZone?: string;
 }
